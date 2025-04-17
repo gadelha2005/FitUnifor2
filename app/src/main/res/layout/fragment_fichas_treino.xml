@@ -63,10 +63,12 @@
         android:textSize="16sp" />
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_aluno"
         android:layout_width="350dp"
         android:layout_height="70dp"
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
+        android:clickable="true"
         app:cardBackgroundColor="#E9F7FF"
         app:cardCornerRadius="5dp">
 

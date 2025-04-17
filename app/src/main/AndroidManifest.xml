@@ -82,6 +82,18 @@
         <activity android:name=".administrador.PainelAdminstrativoActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity"/>
+
+        <activity
+            android:name=".administrador.fichas.GestaoTreinosActivity"
+            android:parentActivityName=".administrador.fichas.GestaoTreinosActivity"/>
+
+        <activity
+            android:name=".administrador.fichas.NovoTreinoAlunoActivity"
+            android:parentActivityName=".administrador.fichas.GestaoTreinosActivity"/>
+
+        <activity
+            android:name=".administrador.fichas.AdicionarExercicioActivity"
+            android:parentActivityName=".administrador.fichas.NovoTreinoAlunoActivity"/>
     </application>
 
 </manifest>

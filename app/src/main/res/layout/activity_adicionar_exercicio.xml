@@ -5,20 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
+    android:backgroundTint="#FFFFFF"
     android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         app:cardBackgroundColor="#007BFF">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/icon_arrow_back_meus_treinos"
+                android:id="@+id/icon_back_novo_treino_aluno"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginStart="16dp"
@@ -26,23 +27,24 @@
                 android:clickable="true"
                 android:contentDescription="Voltar"
                 android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:src="@drawable/icon_arrow_back" />
+                app:srcCompat="@drawable/icon_arrow_back"
+                tools:srcCompat="@drawable/icon_arrow_back" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/textView46"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="#007BFF"
-                app:tabTextColor="#FFFFFF" />
-
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:text="Adicionar Exercício"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/view_pager"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewExercicios"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"
+        android:padding="8dp" />
 </LinearLayout>

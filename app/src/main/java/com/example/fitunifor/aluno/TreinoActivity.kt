@@ -16,7 +16,7 @@ class TreinoActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_treino)
+        setContentView(R.layout.activity_treino_aluno)
 
         findViewById<View>(R.id.icon_arrow_back_meus_treinos).setOnClickListener {
             voltarParaMeusTreinos()
