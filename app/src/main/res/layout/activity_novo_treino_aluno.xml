@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:backgroundTint="#FFFFFF"
     android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
@@ -27,8 +26,7 @@
                 android:clickable="true"
                 android:contentDescription="Voltar"
                 android:focusable="true"
-                app:srcCompat="@drawable/icon_arrow_back"
-                tools:srcCompat="@drawable/icon_arrow_back" />
+                app:srcCompat="@drawable/icon_arrow_back" />
 
             <TextView
                 android:id="@+id/textView45"
@@ -57,8 +55,8 @@
         android:id="@+id/editTextText3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="16dp"
         android:backgroundTint="#FFFFFF"
         android:ems="10"
         android:hint="Título do Treino"
@@ -69,15 +67,25 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         app:cardBackgroundColor="#000000" />
+
+    <!-- Adicione o RecyclerView aqui -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewExerciciosTreino"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp"
+        android:padding="8dp"
+        tools:listitem="@layout/item_exercicio_novo_treino_aluno" />
 
     <Button
         android:id="@+id/button_adicionar_exercicios_treino"
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
-        android:layout_marginTop="500dp"
+        android:layout_margin="16dp"
         android:backgroundTint="#007BFF"
         android:text="Adicionar Exercício"
         android:textColor="#FFFFFF" />
