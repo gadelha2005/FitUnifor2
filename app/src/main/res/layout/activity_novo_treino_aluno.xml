@@ -29,13 +29,14 @@
                 app:srcCompat="@drawable/icon_arrow_back" />
 
             <TextView
-                android:id="@+id/textView45"
+                android:id="@+id/text_salvar_treino"
                 android:layout_width="73dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="310dp"
                 android:layout_marginTop="-30dp"
                 android:fontFamily="sans-serif-black"
                 android:text="Salvar"
+                android:clickable="true"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp" />
 

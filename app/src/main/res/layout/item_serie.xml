@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -37,4 +39,11 @@
         android:inputType="number"
         android:padding="8dp"
         android:textColor="#6C757D" />
+
+    <ImageView
+        android:id="@+id/icon_apagar_serie"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+        tools:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 </LinearLayout>

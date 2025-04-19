@@ -1,5 +1,6 @@
 package com.example.fitunifor.administrador.fichas
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +25,7 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         const val REQUEST_CODE_ADICIONAR_EXERCICIO = 1001
     }
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_novo_treino_aluno)
@@ -30,6 +33,11 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         val iconBack = findViewById<ImageView>(R.id.icon_back_gestao_treinos)
         val buttonAdicionarExercicios = findViewById<Button>(R.id.button_adicionar_exercicios_treino)
         val editTextTitulo = findViewById<EditText>(R.id.editTextText3)
+        val textSalvarTreino = findViewById<TextView>(R.id.text_salvar_treino)
+
+        textSalvarTreino.setOnClickListener {
+            salvarTreino()
+        }
 
         // Configurar RecyclerView
         recyclerView = findViewById(R.id.recyclerViewExerciciosTreino)
@@ -65,11 +73,7 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
             val intent = Intent(this, AdicionarExercicioActivity::class.java)
             startActivityForResult(intent, REQUEST_CODE_ADICIONAR_EXERCICIO)
         } catch (e: Exception) {
-            Toast.makeText(
-                this,
-                "Não foi possível abrir a tela de exercícios: ${e.localizedMessage}",
-                Toast.LENGTH_LONG
-            ).show()
+            Toast.makeText(this, "Não foi possível abrir a tela de exercícios: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             Log.e("NovoTreinoAluno", "Erro ao navegar", e)
         }
     }
@@ -80,7 +84,6 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE_ADICIONAR_EXERCICIO && resultCode == Activity.RESULT_OK) {
             try {
                 val novosExercicios = data?.getParcelableArrayListExtra<Exercicio>("exercicios_selecionados")
-
                 novosExercicios?.let {
                     it.forEach { novoExercicio ->
                         if (!exerciciosAdicionados.any { existente -> existente.id == novoExercicio.id }) {
@@ -109,7 +112,9 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
             return
         }
 
-        // Implemente a lógica para salvar o treino aqui
-        Toast.makeText(this, "Treino salvo com sucesso!", Toast.LENGTH_SHORT).show()
+        // Se houver exercícios, abre o pop-up para selecionar o dia
+        val dialogFragment = SelecionarDiaTreinoDialogFragment()
+        dialogFragment.show(supportFragmentManager, "SelecionarDiaTreinoDialog")
+
     }
 }

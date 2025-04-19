@@ -78,10 +78,21 @@ class ExercicioNoTreinoAdapter(
                 val textSerieNumero = serieView.findViewById<TextView>(R.id.textSerieNumero)
                 val editPeso = serieView.findViewById<EditText>(R.id.text_edit_peso)
                 val editReps = serieView.findViewById<EditText>(R.id.text_edit_reps)
+                val iconApagarSerie = serieView.findViewById<ImageView>(R.id.icon_apagar_serie)
 
                 textSerieNumero.text = "${index + 1}ª série"
-                editPeso.setText(serie.peso.toString())
-                editReps.setText(serie.repeticoes.toString())
+
+                if (serie.peso != 0.0) {
+                    editPeso.setText(serie.peso.toString())
+                } else {
+                    editPeso.setText("")
+                }
+
+                if (serie.repeticoes != 0) {
+                    editReps.setText(serie.repeticoes.toString())
+                } else {
+                    editReps.setText("")
+                }
 
                 editPeso.setOnFocusChangeListener { _, hasFocus ->
                     if (!hasFocus) {
@@ -95,12 +106,24 @@ class ExercicioNoTreinoAdapter(
                     }
                 }
 
+                // 👉 Mostrar botão apagar só se não for a primeira série
+                if (index == 0) {
+                    iconApagarSerie.visibility = View.GONE
+                } else {
+                    iconApagarSerie.visibility = View.VISIBLE
+                    iconApagarSerie.setOnClickListener {
+                        exercicio.series.removeAt(index)
+                        notifyDataSetChanged() // Redesenha tudo, simples e funcional
+                    }
+                }
+
                 container.addView(serieView)
             } catch (e: Exception) {
                 Log.e("Adapter", "Erro ao configurar série", e)
             }
         }
     }
+
 
     override fun getItemCount(): Int = exercicios.size
 }
