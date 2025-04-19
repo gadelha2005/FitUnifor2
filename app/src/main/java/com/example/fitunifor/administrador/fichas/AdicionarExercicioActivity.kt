@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -104,17 +105,35 @@ class AdicionarExercicioActivity : AppCompatActivity() {
 
     private fun setupBotaoVoltar() {
         findViewById<ImageView>(R.id.icon_back_novo_treino_aluno).setOnClickListener {
+            setResult(Activity.RESULT_CANCELED)
             finish()
         }
     }
 
     private fun setupBotaoAdicionar() {
         btnAdicionar.setOnClickListener {
-            val resultIntent = Intent().apply {
-                putParcelableArrayListExtra("exercicios_selecionados", ArrayList(exerciciosSelecionados))
+            try {
+                val exerciciosParaEnviar = adapter.getSelecionados().map { exercicio ->
+                    Exercicio(
+                        id = exercicio.id,
+                        nome = exercicio.nome,
+                        grupoMuscular = exercicio.grupoMuscular,
+                        imagemUrl = exercicio.imagemUrl,
+                        series = mutableListOf(Serie(1, 0.0, 0)))
+                }
+
+                val resultIntent = Intent().apply {
+                    putParcelableArrayListExtra(
+                        "exercicios_selecionados",
+                        ArrayList(exerciciosParaEnviar)
+                    )
+                }
+                setResult(Activity.RESULT_OK, resultIntent)
+                finish()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Erro ao preparar exercícios", Toast.LENGTH_SHORT).show()
+                e.printStackTrace()
             }
-            setResult(Activity.RESULT_OK, resultIntent)
-            finish()
         }
     }
 }
