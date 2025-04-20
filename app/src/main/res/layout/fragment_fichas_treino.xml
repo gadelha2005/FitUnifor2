@@ -18,7 +18,7 @@
         android:layout_width="350dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        app:cardBackgroundColor="#D9D9D9"
+        app:cardBackgroundColor="#007BFF"
         app:cardCornerRadius="10dp">
 
         <LinearLayout
@@ -40,11 +40,11 @@
                 android:layout_width="305dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="#D9D9D9"
+                android:backgroundTint="#007BFF"
                 android:ems="10"
                 android:gravity="center"
                 android:inputType="text"
-                android:textColor="#000000"
+                android:textColor="#FFFFFF"
                 android:textColorHint="#474747"
                 android:textSize="14sp" />
 

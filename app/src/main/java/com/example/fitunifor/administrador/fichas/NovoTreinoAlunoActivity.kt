@@ -20,9 +20,12 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ExercicioNoTreinoAdapter
     private val exerciciosAdicionados = mutableListOf<Exercicio>()
+    private var treinoEditando: Treino? = null
 
     companion object {
         const val REQUEST_CODE_ADICIONAR_EXERCICIO = 1001
+        const val EXTRA_TREINO_EDICAO = "treino_edicao"
+        const val EXTRA_TREINO_ATUALIZADO = "treino_atualizado"
     }
 
     @SuppressLint("MissingInflatedId")
@@ -30,16 +33,7 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_novo_treino_aluno)
 
-        val iconBack = findViewById<ImageView>(R.id.icon_back_gestao_treinos)
-        val buttonAdicionarExercicios = findViewById<Button>(R.id.button_adicionar_exercicios_treino)
-        val editTextTitulo = findViewById<EditText>(R.id.editTextText3)
-        val textSalvarTreino = findViewById<TextView>(R.id.text_salvar_treino)
-
-        textSalvarTreino.setOnClickListener {
-            salvarTreino()
-        }
-
-        // Configurar RecyclerView
+        // 1. Primeiro inicializa o RecyclerView e Adapter
         recyclerView = findViewById(R.id.recyclerViewExerciciosTreino)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ExercicioNoTreinoAdapter(
@@ -55,13 +49,39 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         )
         recyclerView.adapter = adapter
 
-        iconBack.setOnClickListener {
+        // 2. Depois verifica se está editando um treino
+        treinoEditando = intent.getParcelableExtra(EXTRA_TREINO_EDICAO)
+        if (treinoEditando != null) {
+            carregarTreinoExistente(treinoEditando!!)
+            findViewById<TextView>(R.id.text_salvar_treino).text = "Salvar"
+            findViewById<TextView>(R.id.textView46).text = "Editar Treino"
+        }
+
+        // 3. Configura os listeners
+        findViewById<TextView>(R.id.text_salvar_treino).setOnClickListener {
+            salvarTreino()
+        }
+
+        findViewById<ImageView>(R.id.icon_back_gestao_treinos).setOnClickListener {
             navigateBackToGestaoTreinos()
         }
 
-        buttonAdicionarExercicios.setOnClickListener {
+        findViewById<Button>(R.id.button_adicionar_exercicios_treino).setOnClickListener {
             navigateToAdicionarExercicio()
         }
+    }
+
+    private fun carregarTreinoExistente(treino: Treino) {
+        // Garante que o adapter está inicializado
+        if (!::adapter.isInitialized) {
+            Log.e("NovoTreinoAluno", "Adapter não inicializado!")
+            return
+        }
+
+        findViewById<EditText>(R.id.editTextText3).setText(treino.titulo)
+        exerciciosAdicionados.clear()
+        exerciciosAdicionados.addAll(treino.exercicios)
+        adapter.notifyDataSetChanged()
     }
 
     private fun navigateBackToGestaoTreinos() {
@@ -112,9 +132,39 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
             return
         }
 
-        // Se houver exercícios, abre o pop-up para selecionar o dia
-        val dialogFragment = SelecionarDiaTreinoDialogFragment()
-        dialogFragment.show(supportFragmentManager, "SelecionarDiaTreinoDialog")
+        if (treinoEditando != null) {
+            // Modo edição - não precisa selecionar dia novamente
+            val treinoAtualizado = treinoEditando!!.copy(
+                titulo = titulo,
+                exercicios = ArrayList(exerciciosAdicionados)
+            )
 
+            val resultIntent = Intent().apply {
+                putExtra(EXTRA_TREINO_ATUALIZADO, treinoAtualizado)
+            }
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
+        } else {
+            // Modo criação - mostra diálogo para selecionar dia
+            val dialogFragment = SelecionarDiaTreinoDialogFragment().apply {
+                setOnDiaSelecionadoListener(object : SelecionarDiaTreinoDialogFragment.OnDiaSelecionadoListener {
+                    override fun onDiaSelecionado(dia: String) {
+                        val treinoNovo = Treino(
+                            id = System.currentTimeMillis().toInt(),
+                            titulo = titulo,
+                            diaDaSemana = dia,
+                            exercicios = ArrayList(exerciciosAdicionados)
+                        )
+
+                        val resultIntent = Intent().apply {
+                            putExtra("treino_salvo", treinoNovo)
+                        }
+                        setResult(Activity.RESULT_OK, resultIntent)
+                        finish()
+                    }
+                })
+            }
+            dialogFragment.show(supportFragmentManager, "SelecionarDiaDialog")
+        }
     }
 }
