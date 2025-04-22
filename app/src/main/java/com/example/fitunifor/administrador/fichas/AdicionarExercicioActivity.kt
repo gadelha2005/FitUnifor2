@@ -3,27 +3,28 @@ package com.example.fitunifor.administrador.fichas
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fitunifor.R
 
-class AdicionarExercicioActivity : AppCompatActivity() {
+class AdicionarExercicioActivity : AppCompatActivity(), FiltroMusculoDialogFragment.OnFiltroAplicadoListener {
 
     private lateinit var adapter: ExercicioAdapter
     private val exerciciosSelecionados = mutableListOf<Exercicio>()
     private lateinit var btnAdicionar: CardView
     private lateinit var textQuantidade: TextView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var textMusculo: TextView
 
-    private val todosExercicios = mutableListOf(
+    private val todosExercicios = listOf(
         Exercicio(1, "Supino Reto", "Peito"),
         Exercicio(2, "Agachamento Livre", "Pernas"),
         Exercicio(3, "Barra Fixa", "Costas"),
@@ -39,68 +40,58 @@ class AdicionarExercicioActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adicionar_exercicio)
 
-        // Inicializa as views
+        // Inicializa views
         btnAdicionar = findViewById(R.id.btn_adicionar_exercicios)
         textQuantidade = findViewById(R.id.text_quantidade_exercicios)
         recyclerView = findViewById(R.id.recyclerViewExercicios)
+        textMusculo = findViewById(R.id.text_musculo)
 
         setupRecyclerView()
         setupBusca()
         setupBotaoVoltar()
         setupBotaoAdicionar()
+        setupFiltroMusculos()
+    }
+
+    private fun setupFiltroMusculos() {
+        findViewById<CardView>(R.id.card_filtro_musculos).setOnClickListener {
+            FiltroMusculoDialogFragment().apply {
+                setOnFiltroAplicadoListener(this@AdicionarExercicioActivity)
+            }.show(supportFragmentManager, "FiltroMusculosDialog")
+        }
+    }
+
+    override fun onFiltroAplicado(musculos: List<String>) {
+        textMusculo.text = if (musculos.isEmpty()) "Todos os músculos"
+        else musculos.joinToString()
+        adapter.setFiltroMusculos(musculos)
     }
 
     private fun setupRecyclerView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-
         adapter = ExercicioAdapter(todosExercicios) { exercicio, isChecked ->
-            if (isChecked) {
-                exerciciosSelecionados.add(exercicio)
-            } else {
-                exerciciosSelecionados.remove(exercicio)
-            }
+            if (isChecked) exerciciosSelecionados.add(exercicio)
+            else exerciciosSelecionados.remove(exercicio)
             atualizarBotaoAdicionar()
         }
-
         recyclerView.adapter = adapter
     }
 
     private fun atualizarBotaoAdicionar() {
-        val quantidade = exerciciosSelecionados.size
-        if (quantidade > 0) {
-            btnAdicionar.visibility = View.VISIBLE
-            textQuantidade.text = resources.getQuantityString(
-                R.plurals.texto_exercicios_selecionados,
-                quantidade,
-                quantidade
-            )
-        } else {
-            btnAdicionar.visibility = View.GONE
-        }
+        btnAdicionar.visibility = if (exerciciosSelecionados.isNotEmpty()) View.VISIBLE else View.GONE
+        textQuantidade.text = "${exerciciosSelecionados.size} Exercício(s)"
     }
 
     private fun setupBusca() {
-        val editTextBusca = findViewById<EditText>(R.id.editTextText4)
-        editTextBusca.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                filtrarExercicios(editTextBusca.text.toString())
-                true
-            } else {
-                false
+        findViewById<EditText>(R.id.edit_text_buscar_exercicio).addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+                override fun afterTextChanged(s: Editable?) {}
+                override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    adapter.filter(s?.toString() ?: "")
+                }
             }
-        }
-    }
-
-    private fun filtrarExercicios(termo: String) {
-        val listaFiltrada = if (termo.isEmpty()) {
-            todosExercicios
-        } else {
-            todosExercicios.filter {
-                it.nome.contains(termo, ignoreCase = true) ||
-                        it.grupoMuscular.contains(termo, ignoreCase = true)
-            }
-        }
-        adapter.atualizarLista(listaFiltrada)
+        )
     }
 
     private fun setupBotaoVoltar() {
@@ -112,28 +103,10 @@ class AdicionarExercicioActivity : AppCompatActivity() {
 
     private fun setupBotaoAdicionar() {
         btnAdicionar.setOnClickListener {
-            try {
-                val exerciciosParaEnviar = adapter.getSelecionados().map { exercicio ->
-                    Exercicio(
-                        id = exercicio.id,
-                        nome = exercicio.nome,
-                        grupoMuscular = exercicio.grupoMuscular,
-                        imagemUrl = exercicio.imagemUrl,
-                        series = mutableListOf(Serie(1, 0.0, 0)))
-                }
-
-                val resultIntent = Intent().apply {
-                    putParcelableArrayListExtra(
-                        "exercicios_selecionados",
-                        ArrayList(exerciciosParaEnviar)
-                    )
-                }
-                setResult(Activity.RESULT_OK, resultIntent)
-                finish()
-            } catch (e: Exception) {
-                Toast.makeText(this, "Erro ao preparar exercícios", Toast.LENGTH_SHORT).show()
-                e.printStackTrace()
-            }
+            setResult(Activity.RESULT_OK, Intent().apply {
+                putParcelableArrayListExtra("exercicios_selecionados", ArrayList(adapter.getSelecionados()))
+            })
+            finish()
         }
     }
 }

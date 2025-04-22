@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fitunifor.R
 import com.example.fitunifor.databinding.FragmentAulaAdminBinding
-
 
 class AulaAdminFragment : Fragment() {
     private lateinit var binding: FragmentAulaAdminBinding
     private lateinit var aulaAdapter: AulaAdapter
+    private val listaAulasCompleta = mutableListOf<Aula>()
+    private val listaAulasFiltradas = mutableListOf<Aula>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +30,7 @@ class AulaAdminFragment : Fragment() {
 
     private fun setupRecyclerView() {
         aulaAdapter = AulaAdapter(
-            mutableListOf(), // Lista vazia inicial
+            listaAulasFiltradas,
             onEditarClick = { aula -> editarAula(aula) },
             onRemoverClick = { posicao -> removerAula(posicao) }
         )
@@ -42,14 +42,37 @@ class AulaAdminFragment : Fragment() {
     }
 
     fun adicionarAula(aula: Aula) {
-        aulaAdapter.adicionarAula(aula)
+        listaAulasCompleta.add(aula)
+        listaAulasFiltradas.add(aula)
+        aulaAdapter.notifyItemInserted(listaAulasFiltradas.size - 1)
+    }
+
+    fun filtrarAulas(texto: String) {
+        listaAulasFiltradas.clear()
+        if (texto.isEmpty()) {
+            listaAulasFiltradas.addAll(listaAulasCompleta)
+        } else {
+            listaAulasFiltradas.addAll(
+                listaAulasCompleta.filter { aula ->
+                    aula.nome.contains(texto, true) ||
+                            aula.professor.contains(texto, true) ||
+                            aula.diaSemana.contains(texto, true) ||
+                            aula.horario.contains(texto, true) ||
+                            aula.maxAlunos.toString().contains(texto)
+                }
+            )
+        }
+        aulaAdapter.notifyDataSetChanged()
     }
 
     private fun editarAula(aula: Aula) {
-        // Implemente a edição aqui (pode abrir o mesmo Dialog de adição)
+        // Implemente a edição aqui
     }
 
     private fun removerAula(posicao: Int) {
-        aulaAdapter.removerAula(posicao)
+        val aulaRemovida = listaAulasFiltradas[posicao]
+        listaAulasCompleta.remove(aulaRemovida)
+        listaAulasFiltradas.removeAt(posicao)
+        aulaAdapter.notifyItemRemoved(posicao)
     }
 }

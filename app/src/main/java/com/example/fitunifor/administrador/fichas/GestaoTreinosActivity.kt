@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -16,6 +17,7 @@ class GestaoTreinosActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TreinoAdapter
     private val listaTreinos = mutableListOf<Treino>()
+    private lateinit var alunoAtual: Aluno
 
     companion object {
         private const val REQUEST_CODE_NOVO_TREINO = 1001
@@ -26,41 +28,47 @@ class GestaoTreinosActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gestao_treinos)
 
-        // Configuração do RecyclerView
+        // Recupera dados do aluno
+        alunoAtual = Aluno(
+            intent.getStringExtra("aluno_id") ?: "",
+            intent.getStringExtra("aluno_nome") ?: "Aluno",
+            intent.getStringExtra("aluno_email") ?: ""
+        )
+
+        // Mostra nome do aluno
+        findViewById<TextView>(R.id.text_nome_aluno).text = alunoAtual.nome
+
+        // Configura RecyclerView
         recyclerView = findViewById(R.id.recycler_view_treinos)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         adapter = TreinoAdapter(
             listaTreinos,
-            onEditarClick = { treino ->
-                abrirTelaEdicaoTreino(treino)
-            },
+            onEditarClick = { treino -> abrirTelaEdicaoTreino(treino) },
             onRemoverClick = { treino ->
                 listaTreinos.remove(treino)
                 adapter.notifyDataSetChanged()
             }
         )
-
         recyclerView.adapter = adapter
 
-        // Botão de novo treino
         findViewById<CardView>(R.id.card_novo_treino).setOnClickListener {
-            val intent = Intent(this, NovoTreinoAlunoActivity::class.java)
+            val intent = Intent(this, NovoTreinoAlunoActivity::class.java).apply {
+                putExtra("aluno_id", alunoAtual.id)
+            }
             startActivityForResult(intent, REQUEST_CODE_NOVO_TREINO)
         }
 
-        // Botão voltar
         findViewById<ImageView>(R.id.icon_back_painel_administrativo).setOnClickListener {
             finish()
         }
     }
 
-    // Na GestaoTreinosActivity
     private fun abrirTelaEdicaoTreino(treino: Treino) {
-        Log.d("GestaoTreinos", "Iniciando edição do treino ID: ${treino.id}")
         try {
             val intent = Intent(this, NovoTreinoAlunoActivity::class.java).apply {
                 putExtra(NovoTreinoAlunoActivity.EXTRA_TREINO_EDICAO, treino)
+                putExtra("aluno_id", alunoAtual.id)
             }
             startActivityForResult(intent, REQUEST_CODE_EDITAR_TREINO)
         } catch (e: Exception) {

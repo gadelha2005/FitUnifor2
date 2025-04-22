@@ -21,6 +21,7 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
     private lateinit var adapter: ExercicioNoTreinoAdapter
     private val exerciciosAdicionados = mutableListOf<Exercicio>()
     private var treinoEditando: Treino? = null
+    private lateinit var alunoId: String
 
     companion object {
         const val REQUEST_CODE_ADICIONAR_EXERCICIO = 1001
@@ -33,7 +34,8 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_novo_treino_aluno)
 
-        // 1. Primeiro inicializa o RecyclerView e Adapter
+        alunoId = intent.getStringExtra("aluno_id") ?: ""
+
         recyclerView = findViewById(R.id.recyclerViewExerciciosTreino)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ExercicioNoTreinoAdapter(
@@ -49,7 +51,6 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         )
         recyclerView.adapter = adapter
 
-        // 2. Depois verifica se está editando um treino
         treinoEditando = intent.getParcelableExtra(EXTRA_TREINO_EDICAO)
         if (treinoEditando != null) {
             carregarTreinoExistente(treinoEditando!!)
@@ -57,7 +58,6 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.textView46).text = "Editar Treino"
         }
 
-        // 3. Configura os listeners
         findViewById<TextView>(R.id.text_salvar_treino).setOnClickListener {
             salvarTreino()
         }
@@ -72,12 +72,10 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
     }
 
     private fun carregarTreinoExistente(treino: Treino) {
-        // Garante que o adapter está inicializado
         if (!::adapter.isInitialized) {
             Log.e("NovoTreinoAluno", "Adapter não inicializado!")
             return
         }
-
         findViewById<EditText>(R.id.editTextText3).setText(treino.titulo)
         exerciciosAdicionados.clear()
         exerciciosAdicionados.addAll(treino.exercicios)
@@ -93,7 +91,7 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
             val intent = Intent(this, AdicionarExercicioActivity::class.java)
             startActivityForResult(intent, REQUEST_CODE_ADICIONAR_EXERCICIO)
         } catch (e: Exception) {
-            Toast.makeText(this, "Não foi possível abrir a tela de exercícios: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Erro: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             Log.e("NovoTreinoAluno", "Erro ao navegar", e)
         }
     }
@@ -133,7 +131,6 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
         }
 
         if (treinoEditando != null) {
-            // Modo edição - não precisa selecionar dia novamente
             val treinoAtualizado = treinoEditando!!.copy(
                 titulo = titulo,
                 exercicios = ArrayList(exerciciosAdicionados)
@@ -145,12 +142,12 @@ class NovoTreinoAlunoActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         } else {
-            // Modo criação - mostra diálogo para selecionar dia
             val dialogFragment = SelecionarDiaTreinoDialogFragment().apply {
                 setOnDiaSelecionadoListener(object : SelecionarDiaTreinoDialogFragment.OnDiaSelecionadoListener {
                     override fun onDiaSelecionado(dia: String) {
                         val treinoNovo = Treino(
                             id = System.currentTimeMillis().toInt(),
+                            alunoId = alunoId,
                             titulo = titulo,
                             diaDaSemana = dia,
                             exercicios = ArrayList(exerciciosAdicionados)

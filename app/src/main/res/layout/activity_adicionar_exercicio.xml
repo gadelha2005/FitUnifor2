@@ -67,7 +67,7 @@
                     app:srcCompat="@drawable/icon_search" />
 
                 <EditText
-                    android:id="@+id/editTextText4"
+                    android:id="@+id/edit_text_buscar_exercicio"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:backgroundTint="#007BFF"

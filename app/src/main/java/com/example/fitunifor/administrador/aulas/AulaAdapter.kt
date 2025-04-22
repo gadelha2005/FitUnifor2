@@ -14,7 +14,6 @@ class AulaAdapter(
     private val onRemoverClick: (Int) -> Unit
 ) : RecyclerView.Adapter<AulaAdapter.AulaViewHolder>() {
 
-    // ViewHolder (configura os elementos do layout)
     inner class AulaViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nomeAula: TextView = itemView.findViewById(R.id.text_nome_aula)
         val professor: TextView = itemView.findViewById(R.id.text_professor)

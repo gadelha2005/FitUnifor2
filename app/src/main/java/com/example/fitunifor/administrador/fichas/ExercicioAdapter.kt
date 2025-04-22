@@ -13,8 +13,8 @@ class ExercicioAdapter(
     private val onExercicioSelecionado: (Exercicio, Boolean) -> Unit
 ) : RecyclerView.Adapter<ExercicioAdapter.ExercicioViewHolder>() {
 
-    // Mapa usando o ID do exercício como chave
     private val selecionados = mutableMapOf<Int, Boolean>()
+    private var listaCompleta = exercicios
 
     inner class ExercicioViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
         LayoutInflater.from(parent.context)
@@ -42,15 +42,12 @@ class ExercicioAdapter(
                     "Peito" -> R.drawable.icon_chest
                     "Pernas" -> R.drawable.icon_legs
                     "Costas" -> R.drawable.icon_back_body
-                    "Bíceps" -> R.drawable.icon_warms
-                    "Tríceps" -> R.drawable.icon_warms
+                    "Bíceps", "Tríceps" -> R.drawable.icon_warms
                     else -> R.drawable.icon_body
                 }
             )
 
             checkBox.setOnCheckedChangeListener(null)
-
-            // Usa o ID para buscar se está marcado
             checkBox.isChecked = selecionados[exercicio.id] == true
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -64,14 +61,36 @@ class ExercicioAdapter(
 
     fun atualizarLista(novaLista: List<Exercicio>) {
         exercicios = novaLista
+        notifyDataSetChanged()
+    }
 
-        // Se quiser manter os selecionados, remova essa linha:
-        selecionados.clear()
-
+    fun filter(text: String) {
+        val filteredList = if (text.isEmpty()) {
+            listaCompleta
+        } else {
+            listaCompleta.filter {
+                it.nome.contains(text, ignoreCase = true) ||
+                        it.grupoMuscular.contains(text, ignoreCase = true)
+            }
+        }
+        exercicios = filteredList
         notifyDataSetChanged()
     }
 
     fun getSelecionados(): List<Exercicio> {
         return exercicios.filter { selecionados[it.id] == true }
+    }
+
+    fun setFiltroMusculos(musculos: List<String>) {
+        exercicios = if (musculos.isEmpty()) {
+            listaCompleta
+        } else {
+            listaCompleta.filter { exercicio ->
+                musculos.any { grupo ->
+                    exercicio.grupoMuscular.contains(grupo, ignoreCase = true)
+                }
+            }
+        }
+        notifyDataSetChanged()
     }
 }

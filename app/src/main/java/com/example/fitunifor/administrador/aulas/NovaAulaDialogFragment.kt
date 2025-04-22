@@ -83,7 +83,7 @@ class NovaAulaDialogFragment : DialogFragment() {
         // Botão Salvar
         binding.buttonSalvarAula.setOnClickListener {
             val nomeAula = binding.editTextNomeAula.text.toString()
-            val professor = binding.editTextNomeProfessor.text.toString()
+            val professor = binding.editTextProfessor.text.toString()
             val diaSemana = binding.spinnerDiaSemana.selectedItem.toString()
             val horario = binding.editTextHorario.text.toString()
             val maxAlunos = binding.editMaximoAlunos.text.toString().toIntOrNull() ?: 0
@@ -120,7 +120,7 @@ class NovaAulaDialogFragment : DialogFragment() {
                 false
             }
             professor.isEmpty() -> {
-                binding.editTextNomeProfessor.error = "Digite o nome do professor"
+                binding.editTextProfessor.error = "Digite o nome do professor"
                 false
             }
             horario.isEmpty() -> {

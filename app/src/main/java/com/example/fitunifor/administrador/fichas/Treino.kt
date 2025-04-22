@@ -5,6 +5,7 @@ import android.os.Parcelable
 
 data class Treino(
     val id: Int,
+    val alunoId: String,
     val titulo: String,
     val diaDaSemana: String,
     val corFundo: String = "#E9F7FF",
@@ -13,6 +14,7 @@ data class Treino(
 
     constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
+        alunoId = parcel.readString() ?: "",
         titulo = parcel.readString() ?: "",
         diaDaSemana = parcel.readString() ?: "",
         corFundo = parcel.readString() ?: "#E9F7FF",
@@ -23,6 +25,7 @@ data class Treino(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
+        parcel.writeString(alunoId)
         parcel.writeString(titulo)
         parcel.writeString(diaDaSemana)
         parcel.writeString(corFundo)
