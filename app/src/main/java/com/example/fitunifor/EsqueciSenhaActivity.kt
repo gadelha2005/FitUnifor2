@@ -1,6 +1,5 @@
 package com.example.fitunifor
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Button
@@ -8,15 +7,19 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.fitunifor.R
+import com.google.firebase.auth.FirebaseAuth
 
 class EsqueciSenhaActivity : AppCompatActivity() {
 
     private lateinit var editEmail: EditText
+    private lateinit var firebaseAuth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_esqueci_senha)
+
+        // Inicializa Firebase Auth
+        firebaseAuth = FirebaseAuth.getInstance()
 
         editEmail = findViewById(R.id.text2_email)
 
@@ -47,20 +50,39 @@ class EsqueciSenhaActivity : AppCompatActivity() {
                 showAlert("Email inválido", "Por favor, digite um email válido")
             }
             else -> {
-                // Email válido, pode prosseguir
-                enviarParaRedefinicaoSenha(email)
+                // Email válido, enviar email de redefinição
+                enviarEmailRedefinicaoSenha(email)
             }
         }
     }
 
-    private fun enviarParaRedefinicaoSenha(email: String) {
-        Toast.makeText(this, "Email de redefinição enviado para $email", Toast.LENGTH_SHORT).show()
+    private fun enviarEmailRedefinicaoSenha(email: String) {
+        firebaseAuth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    showSuccessDialog(email)
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Falha ao enviar email: ${task.exception?.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+    }
 
-        val intent = Intent(this, RedefinirSenhaActivity::class.java).apply {
-            putExtra("EMAIL", email) // Passa o email para a próxima activity
-        }
-        startActivity(intent)
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    private fun showSuccessDialog(email: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Email enviado")
+            .setMessage("Enviamos um link para redefinir sua senha para o email $email. Por favor, verifique sua caixa de entrada.")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                finish()
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            }
+            .setCancelable(false)
+            .create()
+            .show()
     }
 
     private fun showAlert(title: String, message: String) {

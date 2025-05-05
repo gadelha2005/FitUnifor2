@@ -7,13 +7,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.FirebaseApp
+
+
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tabManager: TabManager
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        FirebaseApp.initializeApp(this)
 
         // Correção: Use o método estático "setup" do companion object
         tabManager = TabManager.setup(

@@ -9,13 +9,15 @@ import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import com.example.fitunfor.LoginActivity
+import com.example.fitunifor.LoginActivity
 import com.example.fitunifor.aluno.PrincipalActivity
 import com.example.fitunifor.EsqueciSenhaActivity
 import com.example.fitunifor.MainActivity
 import com.example.fitunifor.R
 import com.example.fitunifor.administrador.PainelAdminstrativoActivity
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class TabManager constructor(
     private val context: Context,
@@ -24,6 +26,8 @@ class TabManager constructor(
 ) : TabLayout.OnTabSelectedListener {
 
     private var currentTab: Int = 0
+    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     companion object {
         fun setup(
@@ -106,13 +110,8 @@ class TabManager constructor(
                     editEmail.requestFocus()
                     showAlert("Email inválido", "Por favor, digite um email válido")
                 }
-                email == "pedro@gmail.com" -> {
-                    // Se o email for pedro@gmail.com, redireciona para o painel administrativo
-                    navigateToPainelAdministrativo()
-                }
                 else -> {
-                    // Se o email for válido, mas não for o pedro@gmail.com
-                    navigateToPrincipal()
+                    fazerLogin(email, senha)
                 }
             }
         }
@@ -122,17 +121,29 @@ class TabManager constructor(
         }
     }
 
-    private fun navigateToPainelAdministrativo() {
-        val intent = Intent(context, PainelAdminstrativoActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        context.startActivity(intent)
-        (context as? AppCompatActivity)?.overridePendingTransition(
-            android.R.anim.fade_in,
-            android.R.anim.fade_out
-        )
+    private fun fazerLogin(email: String, senha: String) {
+        firebaseAuth.signInWithEmailAndPassword(email, senha)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Login bem-sucedido
+                    redirecionarUsuario(email)
+                } else {
+                    showAlert("Falha no login", "Email ou senha incorretos. Tente novamente.")
+                }
+            }
     }
 
+    private fun redirecionarUsuario(email: String) {
+        val intent = if (email == "admin@fitunifor.com") {
+            Intent(context, PainelAdminstrativoActivity::class.java)
+        } else {
+            Intent(context, PrincipalActivity::class.java)
+        }
+
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
+        (context as? AppCompatActivity)?.finish()
+    }
 
     private fun setupCadastroView(view: View) {
         val editNomeCompleto = view.findViewById<EditText>(R.id.text_nome_completo)
@@ -179,6 +190,11 @@ class TabManager constructor(
                     editEmail.requestFocus()
                     showAlert("Email inválido", "Por favor, digite um email válido")
                 }
+                senha.length < 6 -> {
+                    editSenha.error = "Senha deve ter pelo menos 6 caracteres"
+                    editSenha.requestFocus()
+                    showAlert("Senha fraca", "A senha deve ter no mínimo 6 caracteres")
+                }
                 senha != confirmarSenha -> {
                     editSenha.error = "As senhas não são iguais"
                     editConfirmarSenha.error = "As senhas não são iguais"
@@ -186,17 +202,50 @@ class TabManager constructor(
                     showAlert("Erro de senha", "As senhas não coincidem. Tente novamente.")
                 }
                 else -> {
-                    // Realize o cadastro aqui (ex: chamar um método para salvar os dados)
-                    showAlert("Cadastro realizado", "Você foi cadastrado com sucesso!")
-                    // Agora, redireciona o usuário para a tela de login
-                    navigateToLogin()
+                    cadastrarUsuario(nomeCompleto, email, senha)
                 }
             }
         }
     }
 
-    private fun navigateToLogin() {
-        val intent = Intent(context, MainActivity::class.java).apply {
+    private fun cadastrarUsuario(nomeCompleto: String, email: String, senha: String) {
+        firebaseAuth.createUserWithEmailAndPassword(email, senha)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Cadastro no Authentication bem-sucedido, agora salva os dados no Firestore
+                    val userId = firebaseAuth.currentUser?.uid ?: ""
+                    salvarDadosUsuario(userId, nomeCompleto, email)
+                } else {
+                    showAlert("Erro no cadastro", task.exception?.message ?: "Erro desconhecido")
+                }
+            }
+    }
+
+    private fun salvarDadosUsuario(userId: String, nomeCompleto: String, email: String) {
+        val usuario = hashMapOf(
+            "nome" to nomeCompleto,
+            "email" to email,
+            "tipo" to "aluno" // Define o tipo de usuário como aluno por padrão
+        )
+
+        firestore.collection("usuarios")
+            .document(userId)
+            .set(usuario)
+            .addOnSuccessListener {
+                showAlert("Cadastro realizado", "Você foi cadastrado com sucesso!") {
+                    // Após o cadastro, muda para a tab de login e preenche o email
+                    tabLayout.getTabAt(0)?.select()
+                    val loginView = cardView.findViewById<EditText>(R.id.text_email)
+                    loginView?.setText(email)
+                }
+            }
+            .addOnFailureListener { e ->
+                showAlert("Erro ao salvar dados", e.message ?: "Erro desconhecido")
+            }
+    }
+
+    private fun navigateToPainelAdministrativo() {
+        val intent = Intent(context, PainelAdminstrativoActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
@@ -205,7 +254,6 @@ class TabManager constructor(
             android.R.anim.fade_out
         )
     }
-
 
     private fun navigateToPrincipal() {
         val intent = Intent(context, PrincipalActivity::class.java).apply {
@@ -227,12 +275,15 @@ class TabManager constructor(
         )
     }
 
-    private fun showAlert(title: String, message: String) {
+    private fun showAlert(title: String, message: String, callback: (() -> Unit)? = null) {
         if (context is AppCompatActivity) {
             AlertDialog.Builder(context as AppCompatActivity)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .setPositiveButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                    callback?.invoke()
+                }
                 .create()
                 .show()
         }

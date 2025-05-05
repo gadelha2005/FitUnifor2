@@ -1,24 +1,17 @@
 package com.example.fitunifor.aluno
 
+import Aula
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.fitunifor.R
 
 class PrincipalActivity : AppCompatActivity() {
-
-    // Variáveis para controlar o estado de participação nas aulas
-    private var alunosYoga = 0
-    private var alunosZumba = 0
-
-    companion object {
-        private const val CAPACIDADE_MAXIMA_YOGA = 20
-        private const val CAPACIDADE_MAXIMA_ZUMBA = 22
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,60 +22,48 @@ class PrincipalActivity : AppCompatActivity() {
         val cardIa = findViewById<CardView>(R.id.card_ia)
         val cardCalendario = findViewById<CardView>(R.id.card_calendario)
         val buttonIniciarTreino = findViewById<Button>(R.id.button_iniciar_treino1)
-        val btnParticiparYoga = findViewById<Button>(R.id.button_participar_aula_yoga)
-        val btnParticiparZumba = findViewById<Button>(R.id.button_participar_aula_zumba)
-        val textIntegrantesYoga = findViewById<TextView>(R.id.text_integrantes_alunos_yoga)
-        val textIntegrantesZumba = findViewById<TextView>(R.id.text_integrantes_alunos_zumba)
+        val recyclerAulas = findViewById<RecyclerView>(R.id.recycler_aulas_diarias)
 
+        // Configura o RecyclerView
+        setupAulasRecyclerView(recyclerAulas)
 
         // Configura os listeners
         cardMeusTreinos.setOnClickListener { navigateToMeusTreinos() }
         cardCalendario.setOnClickListener { navigateCalendario() }
         cardIa.setOnClickListener { navigteIa() }
         buttonIniciarTreino.setOnClickListener { navigateToTreinoIniciado() }
+    }
 
+    private fun setupAulasRecyclerView(recyclerView: RecyclerView) {
+        // Criar lista de aulas de exemplo
+        val listaAulas = listOf(
+            Aula(
+                id = "1",
+                nome = "Yoga",
+                professor = "João Silva",
+                horario = "09:00",
+                maxAlunos = 20,
+                alunosMatriculados = 0,
+                imagem = R.drawable.image_aula_yoga, // Substitua pelo seu drawable
+                diaSemana = "Segunda"
+            ),
+            Aula(
+                id = "2",
+                nome = "Zumba",
+                professor = "Marcela Souza",
+                horario = "20:00",
+                maxAlunos = 25,
+                alunosMatriculados = 0,
+                imagem = R.drawable.image_aula_zumba, // Substitua pelo seu drawable
+                diaSemana = "Quarta"
+            )
+        )
 
-        // Listener para o botão de Yoga
-        btnParticiparYoga.setOnClickListener {
-            if (btnParticiparYoga.text == "Participar") {
-                // Tentativa de participar
-                if (alunosYoga < CAPACIDADE_MAXIMA_YOGA) {
-                    alunosYoga++
-                    textIntegrantesYoga.text = "$alunosYoga alunos"
-                    btnParticiparYoga.text = "Cancelar"
-                    Toast.makeText(this, "Presença confirmada na aula de Yoga!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Aula de Yoga lotada!", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                // Cancelar participação
-                alunosYoga--
-                textIntegrantesYoga.text = "$alunosYoga alunos"
-                btnParticiparYoga.text = "Participar"
-                Toast.makeText(this, "Participação cancelada!", Toast.LENGTH_SHORT).show()
-            }
-        }
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.layoutManager = layoutManager
 
-        // Listener para o botão de Zumba
-        btnParticiparZumba.setOnClickListener {
-            if (btnParticiparZumba.text == "Participar") {
-                // Tentativa de participar
-                if (alunosZumba < CAPACIDADE_MAXIMA_ZUMBA) {
-                    alunosZumba++
-                    textIntegrantesZumba.text = "$alunosZumba alunos"
-                    btnParticiparZumba.text = "Cancelar"
-                    Toast.makeText(this, "Presença confirmada na aula de Zumba!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Aula de Zumba lotada!", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                // Cancelar participação
-                alunosZumba--
-                textIntegrantesZumba.text = "$alunosZumba alunos"
-                btnParticiparZumba.text = "Participar"
-                Toast.makeText(this, "Participação cancelada!", Toast.LENGTH_SHORT).show()
-            }
-        }
+        val adapter = AulasAdapterAluno(listaAulas, isAdmin = false)
+        recyclerView.adapter = adapter
     }
 
     private fun navigateToMeusTreinos() {
@@ -93,10 +74,7 @@ class PrincipalActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         } catch (e: Exception) {
-            Toast.makeText(this,
-                "Não foi possível abrir Meus Treinos\n${e.localizedMessage}",
-                Toast.LENGTH_LONG).show()
-            e.printStackTrace()
+            showErrorToast("Não foi possível abrir Meus Treinos", e)
         }
     }
 
@@ -108,13 +86,11 @@ class PrincipalActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         } catch (e: Exception) {
-            Toast.makeText(this,
-                "Não foi possível iniciar o treino\n${e.localizedMessage}",
-                Toast.LENGTH_LONG).show()
-            e.printStackTrace()
+            showErrorToast("Não foi possível iniciar o treino", e)
         }
     }
-    private  fun navigteIa(){
+
+    private fun navigteIa() {
         try {
             val intent = Intent(this, IAActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -122,14 +98,11 @@ class PrincipalActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         } catch (e: Exception) {
-            Toast.makeText(this,
-                "Não foi possível ir para a tela de ia\n${e.localizedMessage}",
-                Toast.LENGTH_LONG).show()
-            e.printStackTrace()
+            showErrorToast("Não foi possível ir para a tela de IA", e)
         }
     }
 
-    private fun navigateCalendario(){
+    private fun navigateCalendario() {
         try {
             val intent = Intent(this, CalendarioActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -137,12 +110,12 @@ class PrincipalActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         } catch (e: Exception) {
-            Toast.makeText(this,
-                "Não foi possível ir para a tela de Calendario\n${e.localizedMessage}",
-                Toast.LENGTH_LONG).show()
-            e.printStackTrace()
+            showErrorToast("Não foi possível ir para a tela de Calendário", e)
         }
     }
 
-
+    private fun showErrorToast(message: String, exception: Exception) {
+        Toast.makeText(this, "$message\n${exception.localizedMessage}", Toast.LENGTH_LONG).show()
+        exception.printStackTrace()
+    }
 }

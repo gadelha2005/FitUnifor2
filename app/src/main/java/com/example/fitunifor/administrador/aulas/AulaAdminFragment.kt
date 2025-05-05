@@ -1,5 +1,6 @@
 package com.example.fitunifor.administrador.aulas
 
+import Aula
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import com.example.fitunifor.databinding.FragmentAulaAdminBinding
 
 class AulaAdminFragment : Fragment() {
     private lateinit var binding: FragmentAulaAdminBinding
-    private lateinit var aulaAdapter: AulaAdapter
+    private lateinit var aulaAdapter: AulaAdapterAdmin
     private val listaAulasCompleta = mutableListOf<Aula>()
     private val listaAulasFiltradas = mutableListOf<Aula>()
 
@@ -29,7 +30,7 @@ class AulaAdminFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        aulaAdapter = AulaAdapter(
+        aulaAdapter = AulaAdapterAdmin(
             listaAulasFiltradas,
             onEditarClick = { aula -> editarAula(aula) },
             onRemoverClick = { posicao -> removerAula(posicao) }

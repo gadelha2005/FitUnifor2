@@ -25,7 +25,7 @@
         </activity>
 
         <activity
-            android:name="com.example.fitunfor.LoginActivity"
+            android:name="com.example.fitunifor.LoginActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
@@ -37,7 +37,7 @@
         <activity
             android:name=".EsqueciSenhaActivity"
             android:exported="false"
-            android:parentActivityName="com.example.fitunfor.LoginActivity"/>
+            android:parentActivityName="com.example.fitunifor.LoginActivity"/>
 
         <activity
             android:name=".RedefinirSenhaActivity"
@@ -47,7 +47,7 @@
         <activity
             android:name=".aluno.PrincipalActivity"
             android:exported="false"
-            android:parentActivityName="com.example.fitunfor.LoginActivity"/>
+            android:parentActivityName="com.example.fitunifor.LoginActivity"/>
 
         <activity
             android:name=".aluno.MeusTreinosActivity"

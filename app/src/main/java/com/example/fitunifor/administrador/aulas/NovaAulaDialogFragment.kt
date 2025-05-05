@@ -1,5 +1,6 @@
 package com.example.fitunifor.administrador.aulas
 
+import Aula
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -7,7 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.fitunifor.R
 import com.example.fitunifor.databinding.DialogNovaAulaBinding
@@ -17,14 +19,42 @@ class NovaAulaDialogFragment : DialogFragment() {
 
     interface AulaDialogListener {
         fun onAulaSalva(aula: Aula)
+        fun onAulaAtualizada(aula: Aula)
     }
 
     private var _binding: DialogNovaAulaBinding? = null
     private val binding get() = _binding!!
     private var listener: AulaDialogListener? = null
+    private var aulaParaEdicao: Aula? = null
+    private val diasSemana = listOf(
+        "Segunda-feira",
+        "Terça-feira",
+        "Quarta-feira",
+        "Quinta-feira",
+        "Sexta-feira",
+        "Sábado",
+        "Domingo"
+    )
+
+    companion object {
+        private const val ARG_AULA = "aula_para_edicao"
+
+        fun newInstance(aula: Aula? = null): NovaAulaDialogFragment {
+            return NovaAulaDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_AULA, aula)
+                }
+            }
+        }
+    }
 
     fun setListener(listener: AulaDialogListener) {
         this.listener = listener
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        aulaParaEdicao = arguments?.getParcelable(ARG_AULA)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -45,17 +75,12 @@ class NovaAulaDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Configuração do Spinner
-        val diasSemana = listOf(
-            "Segunda-feira",
-            "Terça-feira",
-            "Quarta-feira",
-            "Quinta-feira",
-            "Sexta-feira",
-            "Sábado",
-            "Domingo"
-        )
+        setupViews()
+        setupListeners()
+        preencherCamposSeEdicao()
+    }
 
+    private fun setupViews() {
         val adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_item,
@@ -63,46 +88,81 @@ class NovaAulaDialogFragment : DialogFragment() {
         ).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
-
         binding.spinnerDiaSemana.adapter = adapter
+    }
 
-        // Configuração do TimePicker
+    private fun setupListeners() {
         binding.editTextHorario.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            TimePickerDialog(
-                requireContext(),
-                { _, hour, minute ->
-                    binding.editTextHorario.setText("%02d:%02d".format(hour, minute))
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true
-            ).show()
+            mostrarTimePicker()
         }
 
-        // Botão Salvar
         binding.buttonSalvarAula.setOnClickListener {
-            val nomeAula = binding.editTextNomeAula.text.toString()
-            val professor = binding.editTextProfessor.text.toString()
-            val diaSemana = binding.spinnerDiaSemana.selectedItem.toString()
-            val horario = binding.editTextHorario.text.toString()
-            val maxAlunos = binding.editMaximoAlunos.text.toString().toIntOrNull() ?: 0
+            salvarOuAtualizarAula()
+        }
 
-            if (validarCampos(nomeAula, professor, diaSemana, horario, maxAlunos)) {
+        binding.iconClose.setOnClickListener {
+            dismiss()
+        }
+    }
+
+    private fun preencherCamposSeEdicao() {
+        aulaParaEdicao?.let { aula ->
+            binding.textView35.text = "Editar Aula"
+            binding.editTextNomeAula.setText(aula.nome)
+            binding.editTextProfessor.setText(aula.professor)
+            binding.editTextHorario.setText(aula.horario)
+            binding.editMaximoAlunos.setText(aula.maxAlunos.toString())
+
+            val posicaoDia = diasSemana.indexOf(aula.diaSemana)
+            if (posicaoDia >= 0) {
+                binding.spinnerDiaSemana.setSelection(posicaoDia)
+            }
+        }
+    }
+
+    private fun mostrarTimePicker() {
+        val calendar = Calendar.getInstance()
+        TimePickerDialog(
+            requireContext(),
+            { _, hour, minute ->
+                binding.editTextHorario.setText("%02d:%02d".format(hour, minute))
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
+    }
+
+    private fun salvarOuAtualizarAula() {
+        val nomeAula = binding.editTextNomeAula.text.toString()
+        val professor = binding.editTextProfessor.text.toString()
+        val diaSemana = binding.spinnerDiaSemana.selectedItem.toString()
+        val horario = binding.editTextHorario.text.toString()
+        val maxAlunos = binding.editMaximoAlunos.text.toString().toIntOrNull() ?: 0
+        val imagem = R.drawable.image_aula_coletiva// Ou implemente a seleção de imagem
+
+        if (validarCampos(nomeAula, professor, diaSemana, horario, maxAlunos)) {
+            if (aulaParaEdicao != null) {
+                val aulaAtualizada = aulaParaEdicao!!.copy(
+                    nome = nomeAula,
+                    professor = professor,
+                    diaSemana = diaSemana,
+                    horario = horario,
+                    maxAlunos = maxAlunos,
+                    imagem = imagem
+                )
+                listener?.onAulaAtualizada(aulaAtualizada)
+            } else {
                 val novaAula = Aula(
                     nome = nomeAula,
                     professor = professor,
                     diaSemana = diaSemana,
                     horario = horario,
-                    maxAlunos = maxAlunos
+                    maxAlunos = maxAlunos,
+                    imagem = imagem
                 )
                 listener?.onAulaSalva(novaAula)
-                dismiss()
             }
-        }
-
-        // Botão Fechar
-        binding.iconClose.setOnClickListener {
             dismiss()
         }
     }

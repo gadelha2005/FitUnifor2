@@ -15,7 +15,7 @@ import com.example.fitunifor.R
 
 class GestaoTreinosActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: TreinoAdapter
+    private lateinit var adapter: TreinoAdapterAdmin
     private val listaTreinos = mutableListOf<Treino>()
     private lateinit var alunoAtual: Aluno
 
@@ -42,7 +42,7 @@ class GestaoTreinosActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler_view_treinos)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = TreinoAdapter(
+        adapter = TreinoAdapterAdmin(
             listaTreinos,
             onEditarClick = { treino -> abrirTelaEdicaoTreino(treino) },
             onRemoverClick = { treino ->

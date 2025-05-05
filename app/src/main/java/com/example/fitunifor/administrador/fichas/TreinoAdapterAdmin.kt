@@ -10,11 +10,11 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fitunifor.R
 
-class TreinoAdapter(
+class TreinoAdapterAdmin(
     private val treinos: List<Treino>,
     private val onEditarClick: (Treino) -> Unit,
     private val onRemoverClick: (Treino) -> Unit
-) : RecyclerView.Adapter<TreinoAdapter.TreinoViewHolder>() {
+) : RecyclerView.Adapter<TreinoAdapterAdmin.TreinoViewHolder>() {
 
     inner class TreinoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textNome: TextView = itemView.findViewById(R.id.text_nome_treino)

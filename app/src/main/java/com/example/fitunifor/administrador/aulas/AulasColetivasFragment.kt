@@ -1,5 +1,6 @@
 package com.example.fitunifor.administrador.aulas
 
+import Aula
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,7 +14,7 @@ class AulasColetivasFragment : Fragment(R.layout.fragment_aulas_coletivas) {
 
     private var _binding: FragmentAulasColetivasBinding? = null
     private val binding get() = _binding!!
-    private lateinit var aulaAdapter: AulaAdapter
+    private lateinit var aulaAdapter: AulaAdapterAdmin
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -24,8 +25,30 @@ class AulasColetivasFragment : Fragment(R.layout.fragment_aulas_coletivas) {
     }
 
     private fun setupRecyclerView() {
-        aulaAdapter = AulaAdapter(
-            mutableListOf(),
+        // Aulas de exemplo
+        val aulasTeste = listOf(
+            Aula(
+                nome = "Yoga",
+                professor = "João Silva",
+                diaSemana = "Segunda-feira",
+                horario = "08:00",
+                maxAlunos = 20,
+                imagem = R.drawable.image_aula_yoga, // Substitua pelos seus drawables
+                alunosMatriculados = 15
+            ),
+            Aula(
+                nome = "Zumba",
+                professor = "Maria Oliveira",
+                diaSemana = "Quarta-feira",
+                horario = "19:00",
+                maxAlunos = 25,
+                imagem = R.drawable.image_aula_zumba, // Substitua pelos seus drawables
+                alunosMatriculados = 18
+            )
+        )
+
+        aulaAdapter = AulaAdapterAdmin(
+            aulasTeste.toMutableList(), // Converta para MutableList
             onEditarClick = { aula -> editarAula(aula) },
             onRemoverClick = { posicao -> removerAula(posicao) }
         )
@@ -52,22 +75,33 @@ class AulasColetivasFragment : Fragment(R.layout.fragment_aulas_coletivas) {
     }
 
     private fun showNovaAulaDialog() {
-        NovaAulaDialogFragment().apply {
+        NovaAulaDialogFragment.newInstance().apply {
             setListener(object : NovaAulaDialogFragment.AulaDialogListener {
                 override fun onAulaSalva(aula: Aula) {
                     aulaAdapter.adicionarAula(aula)
+                }
+                override fun onAulaAtualizada(aula: Aula) {
+                    aulaAdapter.atualizarAula(aula)
                 }
             })
         }.show(childFragmentManager, "NovaAulaDialog")
     }
 
-    private fun filtrarAulas(texto: String) {
-        // Implementação do filtro movida para o Adapter se necessário
-        // Ou mantenha a lógica aqui conforme sua preferência
+    private fun editarAula(aula: Aula) {
+        NovaAulaDialogFragment.newInstance(aula).apply {
+            setListener(object : NovaAulaDialogFragment.AulaDialogListener {
+                override fun onAulaSalva(aula: Aula) {
+                    aulaAdapter.adicionarAula(aula)
+                }
+                override fun onAulaAtualizada(aula: Aula) {
+                    aulaAdapter.atualizarAula(aula)
+                }
+            })
+        }.show(childFragmentManager, "EditarAulaDialog")
     }
 
-    private fun editarAula(aula: Aula) {
-        // Implemente a edição da aula
+    private fun filtrarAulas(texto: String) {
+        // Implementação do filtro
     }
 
     private fun removerAula(posicao: Int) {
