@@ -22,7 +22,7 @@
         android:layout_width="300dp"
         android:layout_height="380dp"
         android:layout_marginTop="40dp"
-        app:cardBackgroundColor="#D9D9D9"
+        app:cardBackgroundColor="#E9F7FF"
         app:cardCornerRadius="30dp">
 
         <LinearLayout
@@ -59,7 +59,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginTop="60dp"
-                android:text="Enviar para o Email" />
+                android:backgroundTint="#007BFF"
+                android:text="Enviar para o Email"
+                android:textColor="#F6F6F6" />
 
             <Button
                 android:id="@+id/button_voltar_login"

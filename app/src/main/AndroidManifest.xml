@@ -41,8 +41,17 @@
 
         <activity
             android:name=".RedefinirSenhaActivity"
-            android:exported="false"
-            android:parentActivityName=".EsqueciSenhaActivity"/>
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="fitunifor-a5630.firebaseapp.com"
+                    android:pathPrefix="/__/auth/action"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".aluno.PrincipalActivity"
